@@ -71,7 +71,14 @@ public class ChatClient extends AbstractClient
   {
     try
     {
-      sendToServer(message);
+    
+      if (message.startsWith("#")) {
+    	  handleCommand(message);
+      }
+      
+      else {
+    	  sendToServer(message);
+      }
     }
     catch(IOException e)
     {
@@ -81,6 +88,86 @@ public class ChatClient extends AbstractClient
     }
   }
   
+  private void handleCommand(String command) {
+	  if (command.equals("#quit")) {
+		  clientUI.display("Client terminated successfully");
+		  quit();
+	  }
+	  else if (command.equals("#logoff")) {
+		  try {
+			  closeConnection();
+			  clientUI.display("Successfully logged off");
+		  } catch (IOException e) {
+			  clientUI.display("Failed to log off");
+		  }
+	  }
+	  else if (command.startsWith("#sethost")) {
+		  if (isConnected()) {
+			  clientUI.display("Error: please log off in order to sethost name");
+		  } else {
+			  // Need to parse the string to get the host name
+			  String[] words = command.split(" ");
+			  
+			  if (words.length < 2) {
+				  clientUI.display("Please include a host name");
+			  } else {
+				  String hostName = words[1];
+				  setHost(hostName);
+				  clientUI.display("Host name set to " + hostName);
+			  }
+		  }
+	  }
+	  else if (command.startsWith("#setport")) {
+		  if (isConnected()) {
+			  clientUI.display("Error: please log off in order to set port");
+		  } else {
+			  // Need to parse the string to get the port name
+			  String[] words = command.split(" ");
+			  
+			  if (words.length < 2) {
+				  clientUI.display("Please include a port number");
+			  } else {
+				  try {
+					  String portString = words[1];
+					  int portNumber = Integer.parseInt(portString);
+					  setPort(portNumber);
+					  clientUI.display("Port number set to " + portNumber);
+				  } catch (NumberFormatException e) {
+					  clientUI.display("Port must be a valid number");
+				  }
+					  
+			  }
+		  }
+	  }
+	  else if (command.equals("#login")) {
+		  if (isConnected()) {
+			  clientUI.display("Client is already connected");
+		  } else {
+			  try {
+				  openConnection();
+				  clientUI.display("Client is logged in to the server");
+			  } catch (IOException e) {
+				  clientUI.display("Unable to log into the server " + e.getMessage());
+			  }
+		  }
+	  }
+	  else if (command.equals("#gethost")) {
+		  String hostName = getHost();
+		  clientUI.display("Host Name: " + hostName);
+	  }
+	  else if (command.equals("#getport")) {
+		  int portNumber = getPort();
+		  clientUI.display("Port Number: " + portNumber);
+	  }
+	  else {
+		  try {
+			  sendToServer(command);
+		  } catch (IOException e) {
+			  clientUI.display("Unable to send message to the server " + e.getMessage());
+		  }
+	  }
+  }
+	  
   /**
    * This method terminates the client.
    */
