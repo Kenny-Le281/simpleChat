@@ -120,7 +120,7 @@ public class ClientConsole implements ChatIF
     String host = "localhost";
     int port = DEFAULT_PORT;
 
-    if (args.length < 1) {
+    if (args.length < 1 || args[0].trim().isEmpty()) {
     	System.out.println("ERROR - No login ID specified.  Connection aborted.");
     	System.exit(1);
     }
