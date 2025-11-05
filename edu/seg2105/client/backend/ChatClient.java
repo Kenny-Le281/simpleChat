@@ -97,7 +97,6 @@ public class ChatClient extends AbstractClient
 	  else if (command.equals("#logoff")) {
 		  try {
 			  closeConnection();
-			  clientUI.display("Successfully logged off");
 		  } catch (IOException e) {
 			  clientUI.display("Failed to log off");
 		  }
@@ -192,7 +191,7 @@ public class ChatClient extends AbstractClient
 	 */
   	@Override
 	protected void connectionException(Exception exception) {
-  		clientUI.display("The server has shut down");
+  		clientUI.display("The server has shut down.");
   		quit();
 	}
   	
@@ -216,6 +215,7 @@ public class ChatClient extends AbstractClient
 	protected void connectionEstablished() {
   		try {
   			sendToServer("#login " + loginID);
+  			clientUI.display(loginID + " has logged on.");
   		} catch (IOException e) {
   			clientUI.display("Unable to send loginID to the server: " + e.getMessage());
   		}

@@ -82,7 +82,8 @@ public class EchoServer extends AbstractServer
 			// Save the login ID
 			String loginID = parts[1];
 			client.setInfo("loginKey", loginID);
-			System.out.println("Client " + client.getInfo("loginKey") + " has logged in");
+			System.out.println("Message received: #login " + client.getInfo("loginKey") + " from " + client.getInfo("name") + ".");
+			System.out.println(client.getInfo("loginKey") + " has logged on.");
 		} catch (IOException e) {
 			System.out.println("Error: unable to process login " + e.getMessage());
 		}
@@ -92,15 +93,15 @@ public class EchoServer extends AbstractServer
 	
     System.out.println("Message received: " + message + " from " + client.getInfo("loginKey"));
     
-    this.sendToAllClients(client.getInfo("loginKey") + ": " + message.toString());
+    this.sendToAllClients(client.getInfo("loginKey") + "> " + message.toString());
   }
   
   public void handleMessageFromServerUI(String message) {
 	  if (message.startsWith("#")) {
 		  handleCommand(message);
 	  } else {
-		  serverUI.display(message);
-		  sendToAllClients("SERVER MSG> " + message);
+		  serverUI.display("SERVER MESSAGE> " + message);
+		  sendToAllClients("SERVER MESSAGE> " + message);
 	  }
   }
   
@@ -111,7 +112,6 @@ public class EchoServer extends AbstractServer
 	  }
 	  else if (command.equals("#stop")) {
 		  stopListening();
-		  serverUI.display("Server stopped listening");
 	  }
 	  else if (command.equals("#close")) {
 		  try {
@@ -145,12 +145,9 @@ public class EchoServer extends AbstractServer
 	  else if (command.equals("#start")) {
 		  if (isListening()) {
 			  serverUI.display("The server is already listening");
-		  } else if (isClosed()) {
-			  serverUI.display("The server is closed");
 		  } else {
 			  try {
 				  listen();
-				  serverUI.display("Server is listeining for connections on port " + getPort());
 			  } catch (IOException e) {
 				  serverUI.display("Server was unable to start: " + e);
 			  }
@@ -208,7 +205,6 @@ public class EchoServer extends AbstractServer
   @Override
   protected void serverClosed() {
 	  closed = true;
-	  System.out.println("Server closed: all clients disconnected");
   }
   
   /**
@@ -217,9 +213,7 @@ public class EchoServer extends AbstractServer
   @Override
   protected void clientConnected(ConnectionToClient client) {
 	  // Need to store the host name because if the client disconnects, it won't remember the host name so the client = null
-	  String hostName = client.getInetAddress().getHostName();
-	  client.setInfo("name", hostName);
-	  System.out.println("Client " + hostName + " has connected to the server");
+	  System.out.println("A new client has connected to the server.");
   }
   
   /**
@@ -227,14 +221,12 @@ public class EchoServer extends AbstractServer
    */
   @Override
   synchronized protected void clientDisconnected(ConnectionToClient client) {
-	  String hostName = (String) client.getInfo("name");
-	  System.out.println("Client " + hostName + " has disconnected from the server");
+	  System.out.println(client.getInfo("loginKey") + " has disconnected.");
 	}
   
   @Override
   synchronized protected void clientException(ConnectionToClient client, Throwable exception) {
-	  String hostName = (String) client.getInfo("name");
-      System.out.println("Client " + hostName + " has disconnected from the server");
+      System.out.println(client.getInfo("loginKey") + " has disconnected from the server");
   }
 
 }
